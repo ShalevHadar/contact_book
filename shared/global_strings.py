@@ -1,0 +1,6 @@
+contact_base_route_path="/"
+pagination_route_path="/pagination"
+get_contact_route_path="/{contact_id:int}"
+update_contact_route_path="/{contact_id:int}"
+delete_contact_route_path="/{contact_id:int}"
+search_contact_route_path="/search"
