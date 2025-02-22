@@ -57,8 +57,7 @@ FastAPI provides a built-in web-based interactive API documentation (Swagger UI)
 - CRUD - Done
 - Search by all args - Done
 - Logging - Done
-- E2E tests
-- Async routes & handlers (event loop for scale instead of threads) - Done partially (due to db engine)
+- E2E tests - Done
 
 
 ## Additional Improvements
