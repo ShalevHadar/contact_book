@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from server.shared.global_strings import pagination_route_path, get_contact_route_path, contact_base_route_path, \
+from contact_book.shared import database
+from contact_book.shared.global_strings import pagination_route_path, get_contact_route_path, contact_base_route_path, \
     update_contact_route_path, delete_contact_route_path, search_contact_route_path
-from server.shared.logger import app_log
-from server.src import models, schemas, database
-from server.src.services import contacts as contact_service
+from contact_book.shared.logger import app_log
+from contact_book.src.api.contacts import models, schemas
+from contact_book.src.api.contacts import services as contact_service
 
 router = APIRouter(
     prefix="/contacts",
