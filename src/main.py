@@ -2,8 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import os
-from server.src import models, database
-from server.src.api.v1.endpoints import contacts
+from contact_book.src.api.contacts import models
+from contact_book.shared import database
+from contact_book.src.api.contacts.routes import router
 
 app = FastAPI(title="Phone Book API")
 
@@ -17,8 +18,8 @@ app.add_middleware(
 )
 
 models.Base.metadata.create_all(bind=database.engine)
-app.include_router(contacts.router)
+app.include_router(router)
 
 if __name__ == "__main__":
     server_port = os.getenv("PORT", 8001)
-    uvicorn.run("server.src.main:app", host="0.0.0.0", port=int(server_port), reload=True)
+    uvicorn.run("contact_book.src.main:app", host="0.0.0.0", port=int(server_port), reload=True)

@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String
-from server.src.database import Base
+from contact_book.shared.database import Base
 
 class Contact(Base):
     __tablename__ = "contacts"
