@@ -1,7 +1,5 @@
-from fastapi.testclient import TestClient
-
-from server.shared.global_strings import pagination_route_path
-from server.shared.utils import phn
+from contact_book.shared.global_strings import pagination_route_path
+from contact_book.src.api.contacts.utils import phn
 
 base_api_url = "/contacts"
 

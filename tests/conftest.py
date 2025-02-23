@@ -7,8 +7,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from fastapi.testclient import TestClient
-from server.src.models import Base
-from server.src.main import app
+from contact_book.src.models import Base
+from contact_book.src.main import app
 
 TEST_DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(
@@ -18,7 +18,7 @@ engine = create_engine(
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-import server.src.database as database_module
+import contact_book.shared.database as database_module
 database_module.engine = engine
 database_module.SessionLocal = TestingSessionLocal  # Override session
 
@@ -45,6 +45,6 @@ def client(override_get_db_fixture):
     return TestClient(app)
 
 # Correctly override the FastAPI dependency
-from server.src.api.v1.endpoints.contacts import get_db
+from contact_book.src.api.v1.endpoints.contacts import get_db
 app.dependency_overrides[get_db] = lambda: override_get_db_fixture()
 

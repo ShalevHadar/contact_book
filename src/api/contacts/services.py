@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from server.src import models, schemas
+from contact_book.src.api.contacts import models, schemas
 
 def get_contacts(db: Session, skip: int = 0, limit: int = 10):
     """
