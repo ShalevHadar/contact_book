@@ -1,6 +1,7 @@
-# Phone Book API
+# Phone Contact API
 
 A simple phone book API built with Python, FastAPI, and Postgres.
+
 
 ## Features
 
@@ -16,10 +17,6 @@ A simple phone book API built with Python, FastAPI, and Postgres.
 `http://localhost:8000/docs`
 
 ![hi](https://i.ibb.co/qYMc2RVJ/Screenshot-2025-02-22-at-21-57-06.png)
-
-## High-level architecture
-
-![hi](https://i.ibb.co/zVMYd6sk/Screenshot-2025-02-22-at-21-59-22.png)
 
 ## Technologies
 

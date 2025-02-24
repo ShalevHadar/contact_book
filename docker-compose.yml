@@ -1,30 +1,42 @@
-version: '3.8'
+version: "3.0"
 
 services:
-  db:
-    image: postgres:15
-    container_name: phonebook_db
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: phonebook
-    ports:
-      - "5433:5432"
+  web:
+    build: .
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - .:/app
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
 
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: phonebook_app
-    command: uvicorn contact_book.src.main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
-    env_file:
-      - .env
+
     depends_on:
       - db
 
+    networks:
+      - app-network
+
+  db:
+    image: postgres:15
+    container_name: my_postgres
+    restart: always
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+    ports:
+     - "5432:5432"
+
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+    networks:
+      - app-network
+
 volumes:
-  postgres_data:
+  db-data:
+
+networks:
+  app-network:
+    driver: bridge
