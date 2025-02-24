@@ -1,8 +1,11 @@
 import logging
 import sys
 
+
 class AppLogger:
-    def __init__(self, name: str = "contact_book_app_logger", level: int = logging.INFO):
+    def __init__(
+        self, name: str = "contact_book_app_logger", level: int = logging.INFO
+    ):
         """
         Creates a logger with the given name and level. By default, logs at DEBUG level.
         """
@@ -18,7 +21,7 @@ class AppLogger:
             # Create a formatter with timestamps, module name, log level, and the message
             formatter = logging.Formatter(
                 fmt="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
-                datefmt="%Y-%m-%d %H:%M:%S"
+                datefmt="%Y-%m-%d %H:%M:%S",
             )
             console_handler.setFormatter(formatter)
 
@@ -39,5 +42,6 @@ class AppLogger:
 
     def critical(self, message: str):
         self.logger.critical(message)
+
 
 app_log = AppLogger(name="phonebook_app")
