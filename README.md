@@ -6,6 +6,21 @@ A simple phone book API built with Python, FastAPI, and Postgres.
 
 1. Clone the repository
 2. Cd into the project directory
+3. Run `cp .env.example .env`
 3. Run `docker-compose up --build`
 4. Visit `http://localhost:8000/api/v1/docs` to view the API documentation
 5. To run tests, run `docker-compose exec web pytest`
+
+## Key Features 
+
+## 🚀 Features
+- 📄 **RESTful API** with FastAPI  
+- 📞 **Manage Contacts** (Create, Read, Update, Delete, Pagination)  
+- 🔍 **Search contacts** by phone number or full name  
+- 📜 **Pagination** for retrieving contacts efficiently  
+- 🔧 **Validation & Error Handling** using Pydantic  
+- 🗄 **Database Layer** with SQLModel & AsyncSession  
+- ✅ **Tested** (Unit & Integration Tests)   
+- 🐳 **Dockerized Setup** for easy deployment  
+- 🔁 **Mocked Tests** for API, Service, and Database layers  
+- ⏳ **Asynchronous** implementation for high performance
