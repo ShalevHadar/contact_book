@@ -29,4 +29,6 @@ register_all_errors(app)
 register_middleware(app)
 
 
-app.include_router(contact_router, prefix=f"{version_prefix}/contact", tags=["auth"])
+app.include_router(contact_router, prefix=f"{version_prefix}/contacts", tags=["auth"])
+
+__all__ = ["app"]

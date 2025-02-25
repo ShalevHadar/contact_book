@@ -1,88 +1,106 @@
-from sqlalchemy.exc import IntegrityError
-
-from sqlmodel import desc, select
-from sqlmodel.ext.asyncio.session import AsyncSession
-
-from src.db.models import Contact
+from .database import ContactDBLayer
 
 from .schemas import ContactCreateModel, ContactUpdateModel
-from ..errors import ContactNotFound, ContactAlreadyExists, InvalidPageNumber
+from .utils import is_valid_israeli_phone
+from ..database.main import get_session
+from ..errors import (
+    ContactNotFound,
+    InvalidPageNumber,
+    ContactAlreadyExists,
+    InvalidPhoneNumber,
+    InvalidSearch,
+)
+from src.logger import app_log
+
+contact_db_layer = ContactDBLayer()
 
 
 # Create Service
 class ContactService:
-
     # Create contact
-    async def create_contact(
-            self, contact_data: ContactCreateModel, session: AsyncSession
-    ):
-        contact_data_dict = contact_data.model_dump()
-        new_contact = Contact(**contact_data_dict)
-
-        session.add(new_contact)
-
-        try:
-            await session.commit()
-            return new_contact
-        except IntegrityError as e:
-            await session.rollback()  # Rollback transaction to prevent issues
-            if "unique constraint" in str(e.orig).lower():
+    async def create_contact(self, contact_data: ContactCreateModel):
+        app_log.info("Creating a new contact")
+        async with get_session() as session:
+            if is_valid_israeli_phone(contact_data.phone_number) is False:
+                app_log.warning("Invalid phone number provided")
+                raise InvalidPhoneNumber
+            contact = await contact_db_layer.create_contact(
+                contact_data=contact_data, session=session
+            )
+            if contact is None:
+                app_log.warning("Attempt to create a contact that already exists")
                 raise ContactAlreadyExists()
+            app_log.info(f"Contact created: {contact}")
+            return contact
 
     # Get contact
-    async def get_contact(self, contact_id: int, session: AsyncSession):
-        statement = select(Contact).where(Contact.id == contact_id)
-
-        result = await session.exec(statement)
-        contact = result.first()
-
-        if contact:
+    async def get_contact(self, contact_id: int):
+        app_log.info(f"Fetching contact with ID: {contact_id}")
+        async with get_session() as session:
+            contact = await contact_db_layer.get_contact(
+                contact_id=contact_id, session=session
+            )
+            if contact is None:
+                app_log.warning(f"Contact with ID {contact_id} not found")
+                raise ContactNotFound()
             return contact
-        else:
-            raise ContactNotFound()
 
     # Pagination
-    async def get_contacts_paginated(self, page: int, session: AsyncSession):
+    async def get_contacts_paginated(self, page: int):
         if page < 1:
+            app_log.warning("Invalid page number requested")
             raise InvalidPageNumber()
 
         page_size = 10
-        offset = (page - 1) * page_size  # Calculate offset
-
-        statement = select(Contact).offset(offset).limit(page_size)
-        result = await session.execute(statement)
-        contacts = result.scalars().all()
-
-        return contacts
+        offset = (page - 1) * page_size
+        async with get_session() as session:
+            app_log.info(f"Fetching contacts for page {page}")
+            return await contact_db_layer.get_contacts_paginated(
+                offset=offset, page_size=page_size, session=session
+            )
 
     # Delete contact
-    async def delete_contact(self, contact_id: int, session: AsyncSession):
-        contact_to_delete = await self.get_contact(contact_id=contact_id, session=session)
+    async def delete_contact(self, contact_id: int):
+        app_log.info(f"Deleting contact with ID: {contact_id}")
+        async with get_session() as session:
+            deleted = await contact_db_layer.delete_contact(
+                contact_id=contact_id, session=session
+            )
+            if not deleted:
+                app_log.warning(
+                    f"Attempted to delete non-existent contact ID: {contact_id}"
+                )
+                raise ContactNotFound()
+            app_log.info(f"Contact ID {contact_id} deleted successfully")
+            return {"message": "Contact deleted successfully"}
 
-        if contact_to_delete is not None:
-            await session.delete(contact_to_delete)
+    async def update_contact(self, contact_id: int, update_data: ContactUpdateModel):
+        app_log.info(f"Updating contact ID: {contact_id}")
+        async with get_session() as session:
+            contact_to_update = await contact_db_layer.get_contact(contact_id, session)
 
-            await session.commit()
+            if contact_to_update is None:
+                app_log.warning(f"Contact ID {contact_id} not found for update")
+                raise ContactNotFound()
 
-            return contact_to_delete
+            updated_contact = await contact_db_layer.update_contact(
+                contact_to_update, update_data, session
+            )
+            app_log.info(f"Contact ID {contact_id} updated successfully")
+            return updated_contact
 
-        else:
-            return None
-
-    async def update_book(
-        self, book_uid: str, update_data: ContactUpdateModel, session: AsyncSession
+    async def search_contact(
+        self, phone_number: str = None, first_name: str = None, last_name: str = None
     ):
-        book_to_update = await self.get_contact(book_uid, session)
-
-        if book_to_update is not None:
-            update_data_dict = update_data.model_dump()
-
-            for k, v in update_data_dict.items():
-                setattr(book_to_update, k, v)
-
-            await session.commit()
-
-            return book_to_update
-        else:
-            return None
-
+        app_log.info("Searching for contacts")
+        async with get_session() as session:
+            if not phone_number and not (first_name and last_name):
+                raise InvalidSearch()
+            contacts = await contact_db_layer.search_contact(
+                phone_number=phone_number,
+                first_name=first_name,
+                last_name=last_name,
+                session=session,
+            )
+            app_log.info(f"Found {len(contacts)} contacts matching criteria")
+            return contacts if contacts else []

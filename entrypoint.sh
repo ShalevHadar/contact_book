@@ -1,19 +1,27 @@
 #!/bin/bash
 set -e
 
-# Wait for PostgreSQL to be ready
+# ✅ Load .env variables safely
+if [ -f .env ]; then
+  set -o allexport
+  source .env
+  set +o allexport
+fi
+
+# ✅ Wait for PostgreSQL to be ready
 echo "Waiting for database..."
-until pg_isready -h db -p 5432 -U postgres; do
+until pg_isready -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER"; do
   sleep 1
 done
 
 echo "Database is ready."
 
-# Run database creation script
+# ✅ Ensure the database exists before migrations
 python create_db.py
 
-# Run Alembic migrations
+# ✅ Apply migrations
+echo "Applying database migrations..."
 alembic upgrade head
 
-# Start the app (modify this based on your app)
+# ✅ Start the app
 exec "$@"
