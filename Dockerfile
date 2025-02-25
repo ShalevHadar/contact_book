@@ -20,7 +20,7 @@ COPY . .
 RUN chmod +x /app/entrypoint.sh
 
 # Set entrypoint script
-ENTRYPOINT ["/bin/bash", "/app/entrypoint.sh"]
+ENTRYPOINT ["bash", "entrypoint.sh"]
 
 # Expose FastAPI default port
 EXPOSE 8000

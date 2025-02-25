@@ -16,7 +16,16 @@ class ContactNotFound(ContactException):
 class ContactAlreadyExists(ContactException):
     pass
 
+
 class InvalidPageNumber(Exception):
+    pass
+
+
+class InvalidPhoneNumber(Exception):
+    pass
+
+
+class InvalidSearch(Exception):
     pass
 
 
@@ -31,12 +40,23 @@ def create_exception_handler(
 
 def register_all_errors(app: FastAPI):
     app.add_exception_handler(
+        InvalidSearch,
+        create_exception_handler(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            initial_detail={
+                "message": "Invalid Search Parameters",
+                "error_code": "400",
+            },
+        ),
+    )
+
+    app.add_exception_handler(
         ContactAlreadyExists,
         create_exception_handler(
             status_code=status.HTTP_400_BAD_REQUEST,
             initial_detail={
                 "message": "A contact with this phone number already exists.",
-                "error_code": "contact_already_exists",
+                "error_code": "400",
             },
         ),
     )
@@ -47,7 +67,7 @@ def register_all_errors(app: FastAPI):
             status_code=status.HTTP_404_NOT_FOUND,
             initial_detail={
                 "message": "Contact not found",
-                "error_code": "book_exists",
+                "error_code": "404",
             },
         ),
     )
@@ -58,7 +78,18 @@ def register_all_errors(app: FastAPI):
             status_code=status.HTTP_400_BAD_REQUEST,
             initial_detail={
                 "message": "Invalid Page Number",
-                "error_code": "invalid_page_number",
+                "error_code": "400",
+            },
+        ),
+    )
+
+    app.add_exception_handler(
+        InvalidPhoneNumber,
+        create_exception_handler(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            initial_detail={
+                "message": "Invalid Phone Number",
+                "error_code": "400",
             },
         ),
     )
@@ -69,7 +100,7 @@ def register_all_errors(app: FastAPI):
         return JSONResponse(
             content={
                 "message": "Oops! Something went wrong",
-                "error_code": "server_error 2",
+                "error_code": "500",
             },
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
